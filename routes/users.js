@@ -6,26 +6,27 @@ var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user');
 
 
-// Register
+// Render register view/template
 router.get('/register', (req, res) => {
   res.render('register');
 });
 
 
-// Login
+// Register login view/template
 router.get('/login', (req, res) => {
   res.render('login');
 });
 
-// Register User
+// Register User Post
 router.post('/register', (req, res) => {
+  // Hold form values in variables
   var name = req.body.name;
   var email = req.body.email;
   var username = req.body.username;
   var password = req.body.password;
   var password2 = req.body.password2;
 
-  // Validation
+  // Validate values from the form
   req.checkBody('name', 'Name is required').notEmpty();
   req.checkBody('email', 'Email is required').notEmpty();
   req.checkBody('email', 'Email is not valid').isEmail();
@@ -33,9 +34,10 @@ router.post('/register', (req, res) => {
   req.checkBody('password', 'Password is required').notEmpty();
   req.checkBody('password2', 'Passwords do not match').equals(req.body.password);
 
-
+  // Set validation errors (express method)
   var errors = req.validationErrors();
 
+  // Check for validation errors
   if (errors) {
     res.render('register', {
       errors: errors,
@@ -47,34 +49,47 @@ router.post('/register', (req, res) => {
       username: username,
       password: password,
     });
+
     User.createUser(newUser, (err, user) => {
       if (err) throw err;
       console.log(user);
     });
+
     req.flash('success_msg', 'You are registered and can now log in');
 
     res.redirect('/users/login');
   }
 });
 
+// Passport local strategy
+// Call functions defined in the model
 passport.use(new LocalStrategy(
   function(username, password, done) {
+    // Model function to get User by username, takes a username
+    // And a function that takes an error and a user
     User.getUserByUsername(username, function(err, user) {
+      // If error, show error
       if (err) throw err;
+      // If no user match, no handshake with passport
       if (!user) {
-        return done(null, false, {message: 'Unknown user'});
+        return done(null, false, { message: 'Unknown user' });
       }
-      User.comparePassword(password, user.password, function(err, isMatch){
+      // Model function takes a password, the user's password
+      // And a function which takes an error and checks for match
+      User.comparePassword(password, user.password, function(err, isMatch) {
         if (err) throw err;
+        // If there is a match, handshake with passport using that user
         if (isMatch) {
           return done(null, user);
         } else {
+          // If password does not match, no handshake with passport
           done(null, false, { message: 'Invalid password' });
         }
       });
     });
   }));
 
+// Done === callback
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
@@ -86,7 +101,16 @@ passport.deserializeUser(function(id, done) {
 });
 
 router.post('/login',
-  passport.authenticate('local', { successRedirect: '/', failureRedirect: '/users/login', failureFlash: true }),
+  // Add options to authentication
+  passport.authenticate('local', {
+    // Success go to root
+    successRedirect: '/',
+    // Failure go to login page
+    failureRedirect: '/users/login',
+    // Show failure flash message
+    failureFlash: true,
+  }),
+
   function(req, res) {
     res.redirect('/');
   });

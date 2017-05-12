@@ -7,6 +7,7 @@ const expressValidator = require('express-validator');
 const flash = require('connect-flash');
 const session = require('express-session');
 const passport = require('passport');
+// Local authentication from DB
 const LocalStrategy = require('passport-local').Strategy;
 const mongo = require('mongodb');
 const mongoose = require('mongoose');
@@ -15,30 +16,46 @@ mongoose.connect('mongodb://localhost/userauthapp');
 
 const db = mongoose.connection;
 
+
+// Routes
 const routes = require('./routes/index');
 const users = require('./routes/users');
 
+// Init app
 const app = express();
 
+
+// View engine (Handlebars)
+// Want folder views to handle views
 app.set('views', path.join(__dirname, 'views'));
+// Default layout in layouts folder
 app.engine('handlebars', exphbs({ defaultLayout: 'layout' }));
 app.set('view engine', 'handlebars');
 
+
+// Config middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// Public folder for publicly accessible files
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+// Express session
 app.use(session({
+  // Secret can be anything
   secret: 'secret',
   saveUnitialized: true,
   resave: true,
 }));
 
+// Init passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+// Express Validator for form validation
 app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
       var namespace = param.split('.')
@@ -56,12 +73,19 @@ app.use(expressValidator({
   }
 }));
 
+
+// Connect flash
 app.use(flash());
 
+
+// Global vars for flash messages
+// (res.locals for global vars)
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
+  // Passport's own error msg
   res.locals.error = req.flash('error');
+  // If user exists, assign to variable
   res.locals.user = req.user || null;
   next();
 });
@@ -69,8 +93,11 @@ app.use((req, res, next) => {
 app.use('/', routes);
 app.use('/users', users);
 
+
+// Set Port
 app.set('port', (process.env.PORT || 3000));
 
+// Listen on specified port number
 app.listen(app.get('port'), () => {
   console.log('Server started on port ' + app.get('port'));
 });
