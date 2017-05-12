@@ -12,9 +12,13 @@ const UserSchema = mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
+    lowercase: true,
+    trim: true,
   },
   name: {
     type: String,
+    trim: true,
   },
 });
 

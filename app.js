@@ -1,5 +1,3 @@
-// Modules
-
 // Express Framework
 const express = require('express');
 // Utilities for working with file and dir paths
@@ -61,7 +59,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   // Secret can be anything
   secret: 'secret',
-  saveUnitialized: true,
+  saveUninitialized: true,
   resave: true,
 }));
 
@@ -83,7 +81,7 @@ app.use(expressValidator({
     return {
       param: formParam,
       msg: msg,
-      value: value,
+      value:value,
     };
   },
 }));
@@ -114,5 +112,5 @@ app.set('port', (process.env.PORT || 3000));
 
 // Listen on specified port number
 app.listen(app.get('port'), () => {
-  console.log('Server started on port ' + app.get('port'));
+  console.log(`Server started on port ${app.get('port')}`);
 });
