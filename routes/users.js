@@ -1,10 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+const express = require('express');
+const router = express.Router();
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
-var User = require('../models/user');
-
+const User = require('../models/user');
 
 // Render register view/template
 router.get('/register', (req, res) => {
@@ -20,11 +19,11 @@ router.get('/login', (req, res) => {
 // Register User Post
 router.post('/register', (req, res) => {
   // Hold form values in variables
-  var name = req.body.name;
-  var email = req.body.email;
-  var username = req.body.username;
-  var password = req.body.password;
-  var password2 = req.body.password2;
+  const name = req.body.name;
+  const email = req.body.email;
+  const username = req.body.username;
+  const password = req.body.password;
+  const password2 = req.body.password2;
 
   // Validate values from the form
   req.checkBody('name', 'Name is required').notEmpty();
@@ -35,7 +34,7 @@ router.post('/register', (req, res) => {
   req.checkBody('password2', 'Passwords do not match').equals(req.body.password);
 
   // Set validation errors (express method)
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   // Check for validation errors
   if (errors) {
@@ -43,7 +42,7 @@ router.post('/register', (req, res) => {
       errors: errors,
     });
   } else {
-    var newUser = new User({
+    const newUser = new User({
       name: name,
       email: email,
       username: username,
@@ -66,10 +65,10 @@ router.post('/register', (req, res) => {
 // done() = passport 'verify callback', purpose is to find the user
 // that possesses a set of credentials
 passport.use(new LocalStrategy(
-  function(username, password, done) {
+  (username, password, done) => {
     // Model function to get User by username, takes a username
     // And a function that takes an error and a user
-    User.getUserByUsername(username, function(err, user) {
+    User.getUserByUsername(username, (err, user) => {
       // If error, show error
       if (err) throw err;
       // If no user match, no handshake/verification with passport
@@ -78,7 +77,7 @@ passport.use(new LocalStrategy(
       }
       // Model function takes a password, the user's password
       // And a function which takes an error and checks for match
-      User.comparePassword(password, user.password, function(err, isMatch) {
+      User.comparePassword(password, user.password, (err, isMatch) => {
         if (err) throw err;
         // If there is a match, handshake with passport using that user
         if (isMatch) {
@@ -92,12 +91,17 @@ passport.use(new LocalStrategy(
   }));
 
 // Done === callback
-passport.serializeUser(function(user, done) {
+// user's id is saved in the session: req.session.passport.user = {id: '..'}
+// serialize user determines which data of the user object should
+// be stored in the session
+passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.getUserById(id, function(err, user) {
+// User is retrieved according to id supplied in serializeUser
+// http://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize
+passport.deserializeUser((id, done) => {
+  User.getUserById(id, (err, user) => {
     done(err, user);
   });
 });
@@ -113,11 +117,11 @@ router.post('/login',
     failureFlash: true,
   }),
 
-  function(req, res) {
+  (req, res) => {
     res.redirect('/');
   });
 
-router.get('/logout', function(req, res) {
+router.get('/logout', (req, res) => {
   req.logout();
   req.flash('success_msg', 'You are logged out');
   res.redirect('/users/login');

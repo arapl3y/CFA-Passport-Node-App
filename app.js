@@ -72,20 +72,20 @@ app.use(passport.session());
 
 // Express Validator for form validation
 app.use(expressValidator({
-  errorFormatter: function(param, msg, value) {
-      var namespace = param.split('.');
-      var root = namespace.shift();
-      var formParam = root;
+  errorFormatter: (param, msg, value) => {
+    const namespace = param.split('.');
+    const root = namespace.shift();
+    let formParam = root;
 
     while (namespace.length) {
-      formParam += '[' + namespace.shift() + ']';
+      formParam += `[${namespace.shift()}]`;
     }
     return {
-      param : formParam,
-      msg   : msg,
-      value : value
+      param: formParam,
+      msg: msg,
+      value: value,
     };
-  }
+  },
 }));
 
 
