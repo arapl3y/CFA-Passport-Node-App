@@ -63,6 +63,8 @@ router.post('/register', (req, res) => {
 
 // Passport local strategy
 // Call functions defined in the model
+// done() = passport 'verify callback', purpose is to find the user
+// that possesses a set of credentials
 passport.use(new LocalStrategy(
   function(username, password, done) {
     // Model function to get User by username, takes a username
@@ -70,7 +72,7 @@ passport.use(new LocalStrategy(
     User.getUserByUsername(username, function(err, user) {
       // If error, show error
       if (err) throw err;
-      // If no user match, no handshake with passport
+      // If no user match, no handshake/verification with passport
       if (!user) {
         return done(null, false, { message: 'Unknown user' });
       }
@@ -83,7 +85,7 @@ passport.use(new LocalStrategy(
           return done(null, user);
         } else {
           // If password does not match, no handshake with passport
-          done(null, false, { message: 'Invalid password' });
+          done(null, false, { message: 'Incorrect password' });
         }
       });
     });

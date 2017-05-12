@@ -1,19 +1,34 @@
+// Modules
+
+// Express Framework
 const express = require('express');
+// Utilities for working with file and dir paths
 const path = require('path');
+// Parse cookies
 const cookieParser = require('cookie-parser');
+// Parse JSON
 const bodyParser = require('body-parser');
+// Express Handlebars View Engine
 const exphbs = require('express-handlebars');
+// Express form validation middleware
 const expressValidator = require('express-validator');
+// Flash messages
 const flash = require('connect-flash');
+// Express session middleware
 const session = require('express-session');
+// Passport authentication middleware
 const passport = require('passport');
-// Local authentication from DB
+// Passport local authentication from DB
 const LocalStrategy = require('passport-local').Strategy;
+// Mongo Database
 const mongo = require('mongodb');
+// ORM/Object Modeling for MongoDB
 const mongoose = require('mongoose');
 
+// Create connection to DB named userauthapp
 mongoose.connect('mongodb://localhost/userauthapp');
 
+// Assign the connection to a variable db
 const db = mongoose.connection;
 
 
@@ -58,11 +73,11 @@ app.use(passport.session());
 // Express Validator for form validation
 app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
-      var namespace = param.split('.')
-      , root    = namespace.shift()
-      , formParam = root;
+      var namespace = param.split('.');
+      var root = namespace.shift();
+      var formParam = root;
 
-    while(namespace.length) {
+    while (namespace.length) {
       formParam += '[' + namespace.shift() + ']';
     }
     return {
