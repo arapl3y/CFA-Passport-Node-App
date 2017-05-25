@@ -14,6 +14,8 @@ const expressValidator = require('express-validator');
 const flash = require('connect-flash');
 // Express session middleware
 const session = require('express-session');
+// Allows Mongo to connect with browser sessions
+const MongoStore = require('connect-mongo')(session);
 // Passport authentication middleware
 const passport = require('passport');
 // Passport local authentication from DB
@@ -61,6 +63,7 @@ app.use(session({
   secret: 'secret',
   saveUninitialized: true,
   resave: true,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
 // Init passport
